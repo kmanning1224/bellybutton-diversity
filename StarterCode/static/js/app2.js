@@ -61,7 +61,7 @@ function plotbar() {
 
         //Create Bar Plot layout
         let barlayout = {
-            title: `Top Ten OTUs for ID`,
+            title: `Top Ten OTUs for for ID: ${idvar}`,
             margin: {
                 l:150,
                 r:25,
@@ -86,7 +86,7 @@ function plotbar() {
         let bubble_data = [bubbledata];
         //Begin Bubble Plot dict
         let bubblelayout = {
-            title: `Bacteria types found for ID: ${idselect}`
+            title: `Bacteria found for ID: ${idvar}`,
         }
 
         //Create Plots
@@ -102,13 +102,15 @@ function plotbar() {
     //Create function to start page with first ID on dropdown
     function firstSample() {
         let startingsample = d3.select("#selDataset").node().value;
-        plotbar(startingsample)
-        optionChanged(startingsample)    
+        plotbar(startingsample);
+        optionChanged(startingsample);
+  
     };
     //Create function to run plots/metapanel on dropdown list change
-    function changedSample(data) {
+    function changedSample() {
         return d3.select('#selDataset').on("change", plotbar, optionChanged)
     };
     //run function
     firstSample();
     changedSample();
+    
