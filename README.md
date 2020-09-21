@@ -6,74 +6,126 @@ In this assignment, you will build an interactive dashboard to explore the [Bell
 
 The dataset reveals that a small handful of microbial species (also called operational taxonomic units, or OTUs, in the study) were present in more than 70% of people, while the rest were relatively rare.
 
-## Step 1: Plotly
+## Step 1: Set up Dropdown List
+```
+//Setup dropdown menu
+function idlist() {
+        //load in json file
+    d3.json("static/js/samples.json").then(id => {
+        let names = id.names
+        let drop_menu = d3.select("#selDataset");
+        //Pull ID into dropdown, place property into value.
+        names.forEach(function(names_id) {
+            drop_menu.append("option").text(names_id).property("value");
+            //start with plots and starting id panel
 
-1. Use the D3 library to read in `samples.json`.
+        })
+    })
+};
+```
+## Step 2: Set up Meta Panel
+```
+ //Create Metadata Panel
+function optionChanged(){
+        //load json file
+    d3.json("static/js/samples.json").then((meta_data => {
+        let id_drop = d3.select("#selDataset").node().value;
+        let metadata = meta_data.metadata;
+        let meta_id = metadata.filter(i => i.id.toString() === id_drop)[0];
+            // Select elements and make sure they are clear
+        let metapanel = d3.select("#sample-metadata");
+        metapanel.html("")
+            //Pull "Key"/ID from dropdown and push information on ID from metadata
+        Object.entries(meta_id).forEach(([key, value]) => {
+            let panel = metapanel.append("h5");
+            panel.text(key + ":" + "       " + value);
+                
+        })
+    }))
+    };
+```
+## Step 3: Build Plots
+```
+//Start bulding Plots
+function plotbar() {
+    d3.json("static/js/samples.json").then(samplesjson => {
+        //Set ID Var to Metadata table, pulling the information from there
+        //Set variables for bar
+        let idvar = d3.select("#selDataset").node().value;
+        let idselect = samplesjson.samples.filter(i => i.id == idvar)[0];
+        let sample_values = idselect.sample_values.slice(0,10).reverse();
+        let otu_labels = idselect.otu_labels.slice(0,10);
+        let top_ten_otu = idselect.otu_ids.slice(0,10).reverse();
+        let top_ten_id = top_ten_otu.map(i => "OTU ID :" + i);
+        //Set variable for bubble plot
+        let sample_val_bubble = idselect.sample_values;
+        let otu_id_bubble = idselect.otu_ids;
+        //Begin Bar Plot dict 
+        let bartrace = {
+            x: sample_values,
+            y: top_ten_id,
+            text: otu_labels,
+            type: "bar",
+            orientation:"h"
+        };
+        
+        //Store Bar data
+        let bardata = [bartrace];
 
-2. Create a horizontal bar chart with a dropdown menu to display the top 10 OTUs found in that individual.
+        //Create Bar Plot layout
+        let barlayout = {
+            title: `Top Ten OTUs for for ID: ${idvar}`,
+            margin: {
+                l:150,
+                r:25,
+                t:50,
+                b:50
+            }
+        };
+        //Create Plots
+        Plotly.newPlot("bar", bardata, barlayout);
 
-* Use `sample_values` as the values for the bar chart.
+        //Begin Bubble Plot dict
+        let bubbledata = {
+            x:otu_id_bubble,
+            y:sample_val_bubble,
+            mode: "markers",
+            marker: {
+                size: sample_val_bubble,
+                color: otu_id_bubble
+            },
+            text: otu_labels
+        }
+        let bubble_data = [bubbledata];
+        //Begin Bubble Plot dict
+        let bubblelayout = {
+            title: `Bacteria found for ID: ${idvar}`,
+        }
 
-* Use `otu_ids` as the labels for the bar chart.
+        //Create Plots
+        Plotly.newPlot("bubble", bubble_data, bubblelayout )
+    }
 
-* Use `otu_labels` as the hovertext for the chart.
+    )};
 
-  ![bar Chart](Images/hw01.png)
-
-3. Create a bubble chart that displays each sample.
-
-* Use `otu_ids` for the x values.
-
-* Use `sample_values` for the y values.
-
-* Use `sample_values` for the marker size.
-
-* Use `otu_ids` for the marker colors.
-
-* Use `otu_labels` for the text values.
-
-![Bubble Chart](Images/bubble_chart.png)
-
-4. Display the sample metadata, i.e., an individual's demographic information.
-
-5. Display each key-value pair from the metadata JSON object somewhere on the page.
-
-![hw](Images/hw03.png)
-
-6. Update all of the plots any time that a new sample is selected.
-
-Additionally, you are welcome to create any layout that you would like for your dashboard. An example dashboard is shown below:
-
-![hw](Images/hw02.png)
-
-## Advanced Challenge Assignment (Optional)
-
-The following task is advanced and therefore optional.
-
-* Adapt the Gauge Chart from <https://plot.ly/javascript/gauge-charts/> to plot the weekly washing frequency of the individual.
-
-* You will need to modify the example gauge code to account for values ranging from 0 through 9.
-
-* Update the chart whenever a new sample is selected.
-
-![Weekly Washing Frequency Gauge](Images/gauge.png)
-
-## Deployment
-
-* Deploy your app to a free static page hosting service, such as GitHub Pages. Submit the links to your deployment and your GitHub repo.
-
-* Ensure your repository has regular commits (i.e. 20+ commits) and a thorough README.md file
-
-## Hints
-
-* Use `console.log` inside of your JavaScript code to see what your data looks like at each step.
-
-* Refer to the [Plotly.js documentation](https://plot.ly/javascript/) when building the plots.
-
-### About the Data
-
-Hulcr, J. et al.(2012) _A Jungle in There: Bacteria in Belly Buttons are Highly Diverse, but Predictable_. Retrieved from: [http://robdunnlab.com/projects/belly-button-biodiversity/results-and-data/](http://robdunnlab.com/projects/belly-button-biodiversity/results-and-data/)
-
-- - -
-
-© 2019 Trilogy Education Services
+    ////Create function to update Plots/Panel with id change
+```
+## Step 4: Create Functions to make sure Plots + Panel refresh with change and open with first OTU ID selected.
+```
+//first function to run dropdown list
+    idlist();
+    //Create function to start page with first ID on dropdown
+    function firstSample() {
+        let startingsample = d3.select("#selDataset").node().value;
+        plotbar(startingsample);
+        optionChanged(startingsample);
+  
+    };
+    //Create function to run plots/metapanel on dropdown list change
+    function changedSample() {
+        return d3.select('#selDataset').on("change", plotbar, optionChanged)
+    };
+    //run function
+    firstSample();
+    changedSample();
+    ```
