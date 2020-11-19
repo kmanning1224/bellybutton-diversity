@@ -1,4 +1,4 @@
-# Plot.ly Homework - Belly Button Biodiversity
+# Belly Button Biodiversity Analysis
 
 ![img](https://i.gyazo.com/c0002ed0895cf40ded766b597feeccff.png)
 
